@@ -1,6 +1,7 @@
 package com.example.amo_lab2;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
@@ -12,10 +13,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
-    private TextView sorted, output;
+    private TextView sorted, output, checkTime;
     private EditText n, low, top;
     private long[] array, arr1, arr2, arr3, arr4, arr5, arr6, arr7, arr8, arr9, arr10;
     public static double[] time = new double[10];
@@ -35,9 +37,10 @@ public class MainActivity extends AppCompatActivity {
         Button sort2 = findViewById(R.id.sortButton2);
         Button graph = findViewById(R.id.sortButton3);
         output.setMovementMethod(new ScrollingMovementMethod());
-
+        checkTime = findViewById(R.id.textOut);
         getSupportActionBar().setBackgroundDrawable(
-                new ColorDrawable(Color.parseColor("#D80606")));
+                new ColorDrawable(Color.parseColor("#040C3A")));
+        getSupportActionBar().setTitle("lab2 Алгоритм сортування шейкером");
         output.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -51,20 +54,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 try {
-                    array = new long[Integer.parseInt(String.valueOf(n.getText()))];
-                    long toplimit = Integer.parseInt(String.valueOf(top.getText()));
-                    long bottomLimit = Integer.parseInt(String.valueOf(low.getText()));
-
-                    for (int i = 0; i < array.length; i++) {
-                        array[i] = (long) (Math.random() * (toplimit - bottomLimit + 1) + (bottomLimit));
-                    }
-                    if (bottomLimit > toplimit) {
-                        output.setText("Верхня границя має бути більшою за нижню!");
+                    if (Integer.parseInt(String.valueOf(n.getText())) <= 0) {
+                        checkTime.setText("Кількість елементів масиву не може бути від'ємною!");
                     } else {
-                        output.setText(Arrays.toString(array));
+                        array = new long[Integer.parseInt(String.valueOf(n.getText()))];
+                        long toplimit = Integer.parseInt(String.valueOf(top.getText()));
+                        long bottomLimit = Integer.parseInt(String.valueOf(low.getText()));
+                        for (int i = 0; i < array.length; i++) {
+                            array[i] = (long) (Math.random() * (toplimit - bottomLimit + 1) +
+                                    (bottomLimit));
+                        }
+                        if (bottomLimit > toplimit) {
+                            checkTime.setText("Верхня границя має бути більшою за нижню!");
+                        } else {
+                            output.setText(Arrays.toString(array));
+                        }
                     }
                 } catch (NumberFormatException e) {
-                    output.setText("Введіть коректні  числа!");
+                    output.setText("Введіть коректні числа!");
                 }
                 sort.setText("cортувати масив");
             }
@@ -74,20 +81,33 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 try {
                     long m = System.currentTimeMillis();
-                    for(int min = 0; min < array.length-1; min++) {
-                        int least = min;
-                        for(int j = min + 1; j<array.length;j++) {
-                            if(array[j] < array[least]){
-                                least = j;
+                    int left = 1; // ліва границя
+                    int right = array.length - 1; // права границя
+                    int j, k = array.length - 1;
+                    long temp;
+                    do {
+                        for (j = right; j >= left; j--)
+                            if (array[j - 1] > array[j]) {
+                                temp = array[j - 1];
+                                array[j - 1] = array[j];
+                                array[j] = temp;
+                                k = j;
                             }
-                        }
-                        long tmp = array[min];
-                        array[min] = array[least];
-                        array[least] = tmp;
-                    }
-                    sort.setText("Час виконання сортування = " + String.valueOf((double) ((System.currentTimeMillis() - m) / 1000.0) + "s"));
+                        left = k + 1;
+                        for (j = left; j <= right; j++)
+                            if (array[j - 1] > array[j]) {
+                                temp = array[j - 1];
+                                array[j - 1] = array[j];
+                                array[j] = temp;
+                                k = j;// фиксування індекса останнього обміну
+                            }
+                        right = k - 1;// права границя
+                    } while (left <= right);// До того часу, поки ліва
+                    checkTime.setText("Час сортування = " + String.valueOf((double)
+                            ((System.currentTimeMillis() - m) / 1000.0) + "s"));
                     output.setText(Arrays.toString(array));
-                } catch (NullPointerException e) {
+                } catch (
+                        NullPointerException e) {
                     output.setText("Cпочатку згенеруйте масив!");
                 }
             }
@@ -118,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
                 sort10mas(arr8, 7);
                 sort10mas(arr9, 8);
                 sort10mas(arr10, 9);
-                sort2.setText("Масиви відсортовано за " + String.valueOf((double) ((System.currentTimeMillis() - m1) / 1000.0)) + "s");
+                checkTime.setText("Масиви відсортовано за " + String.valueOf((double) ((System.currentTimeMillis() - m1) / 1000.0)) + "s");
                 output.setText(Arrays.toString(time));
             }
         });
@@ -138,17 +158,28 @@ public class MainActivity extends AppCompatActivity {
 
     public void sort10mas(long[] array1, int arraycount) {
         long m = System.currentTimeMillis();
-        for(int min = 0; min < array1.length-1; min++) {
-            int least = min;
-            for(int j = min + 1; j<array1.length;j++) {
-                if(array1[j] < array1[least]){
-                    least = j;
+        int left = 1; // ліва границя
+        int right = array1.length - 1; // права границя
+        int j, k = array1.length - 1;
+        long temp;
+        do {
+            for (j = right; j >= left; j--)
+                if (array1[j - 1] > array1[j]) {
+                    temp = array1[j - 1];
+                    array1[j - 1] = array1[j];
+                    array1[j] = temp;
+                    k = j;
                 }
-            }
-            long tmp = array1[min];
-            array1[min] = array1[least];
-            array1[least] = tmp;
-        }
+            left = k + 1;
+            for (j = left; j <= right; j++)
+                if (array1[j - 1] > array1[j]) {
+                    temp = array1[j - 1];
+                    array1[j - 1] = array1[j];
+                    array1[j] = temp;
+                    k = j;// фиксування індекса останнього обміну
+                }
+            right = k - 1;// права границя
+        } while (left <= right);
         time[arraycount] = (System.currentTimeMillis() - m) / 1000.0;
     }
 
